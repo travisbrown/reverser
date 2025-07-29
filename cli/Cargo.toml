@@ -1,0 +1,12 @@
+[package]
+name = "reverser"
+authors = { workspace = true }
+repository = { workspace = true }
+version = { workspace = true }
+edition = { workspace = true }
+
+[dependencies]
+cli-helpers = { workspace = true }
+itertools = { workspace = true }
+reverser-db = { path = "../db/" }
+thiserror = { workspace = true }
