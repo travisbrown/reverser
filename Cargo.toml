@@ -18,8 +18,8 @@ log = "0.4"
 md-5 = "0.10"
 quickcheck = "1"
 quickcheck_macros = "1"
-rocksdb = { version = "0.23", features = ["zstd"] }
-rocksdb-store = "0.1"
+rocksdb = { version = "0.24", features = ["zstd"] }
+rocksdb-store = "0.3"
 serde = { version = "1", features = ["derive"] }
 sha2 = "0.10"
 tempfile = "3"
