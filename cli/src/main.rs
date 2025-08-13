@@ -72,6 +72,28 @@ fn main() -> Result<(), Error> {
                 }
             }
         }
+        Command::Size { db } => {
+            let database = reverser_db::Database::<false>::open(db)?;
+
+            println!("MD5 values: {}", database.md5_values().count());
+            println!("SHA-256 values: {}", database.sha256_values().count());
+        }
+        Command::ReplaceHost { db, host } => {
+            let database = reverser_db::Database::<true>::open(db)?;
+
+            database.expand(
+                |value| {
+                    let parts = value.split('@').collect::<Vec<_>>();
+
+                    if parts.len() == 2 && parts[1] != host {
+                        Some(format!("{}@{}", parts[0], host))
+                    } else {
+                        None
+                    }
+                },
+                10000,
+            )?;
+        }
     }
 
     Ok(())
@@ -133,5 +155,15 @@ enum Command {
         db: PathBuf,
         #[clap(long, default_value = "1000")]
         chunk_size: usize,
+    },
+    Size {
+        #[clap(long)]
+        db: PathBuf,
+    },
+    ReplaceHost {
+        #[clap(long)]
+        db: PathBuf,
+        #[clap(long)]
+        host: String,
     },
 }
