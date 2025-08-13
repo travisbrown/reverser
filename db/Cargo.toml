@@ -9,6 +9,7 @@ license = { workspace = true }
 [dependencies]
 digest = { workspace = true }
 hex = { workspace = true }
+itertools = { workspace = true }
 md-5 = { workspace = true }
 rocksdb = { workspace = true }
 rocksdb-store = { workspace = true }

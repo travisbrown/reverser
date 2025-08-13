@@ -1,4 +1,5 @@
 use digest::Digest;
+use itertools::Itertools;
 use md5::Md5;
 use rocksdb::{ColumnFamily, ColumnFamilyDescriptor, Options};
 use sha2::Sha256;
@@ -143,6 +144,26 @@ impl Database<true> {
         }
 
         tx.commit()?;
+
+        Ok(())
+    }
+
+    pub fn expand<F: Fn(&str) -> Option<String>>(
+        &self,
+        transform: F,
+        chunk_size: usize,
+    ) -> Result<(), Error> {
+        for chunk in &self.values().chunks(chunk_size) {
+            let values = chunk
+                .filter_map(|value| {
+                    value
+                        .map(|value| transform(&value))
+                        .map_or_else(|error| Some(Err(error)), |value| value.map(Ok))
+                })
+                .collect::<Result<Vec<_>, _>>()?;
+
+            self.add_all(values.iter().map(|value| value.as_str()))?;
+        }
 
         Ok(())
     }
