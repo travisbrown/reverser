@@ -147,14 +147,18 @@ impl Database<true> {
         Ok(())
     }
 
-    pub fn flush<P: AsRef<Path>>(path: P) -> Result<(), rocksdb::Error> {
-        let mut cfs = Self::cfs();
-        cfs.push(ColumnFamilyDescriptor::new("_config", Options::default()));
-        cfs.push(ColumnFamilyDescriptor::new("_books", Options::default()));
+    pub fn flush<P: AsRef<Path>>(path: P) -> Result<(), Error> {
+        let admin = rocksdb_store::Database::<true, Config, ()>::admin(path, Self::cfs())?;
 
-        let db = rocksdb::DB::open_cf_descriptors(&Options::default(), path, cfs)?;
+        admin
+            .compact()
+            .map_err(rocksdb_store::error::Error::from)
+            .map_err(Error::from)?;
 
-        db.flush_wal(true)
+        admin
+            .flush()
+            .map_err(rocksdb_store::error::Error::from)
+            .map_err(Error::from)
     }
 }
 
