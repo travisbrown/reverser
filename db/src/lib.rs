@@ -165,6 +165,25 @@ impl<const W: bool> Database<W> {
         })
     }
 
+    /// Iterate over all values in the database.
+    ///
+    /// Assumes that both hash tables have the same value if both are present, and does not perform any validation.
+    pub fn values(&self) -> impl Iterator<Item = Result<String, Error>> {
+        let cf = match self.underlying.config.hashes {
+            Hashes::Both | Hashes::Md5Only => self.md5_cf(),
+            Hashes::Sha256Only => self.sha256_cf(),
+        };
+
+        self.underlying
+            .db
+            .iterator(cf, rocksdb::IteratorMode::Start)
+            .map(|result| {
+                let (_, value) = result?;
+
+                Ok(String::from_utf8(value.to_vec())?)
+            })
+    }
+
     pub fn md5_values(&self) -> impl Iterator<Item = Result<(String, [u8; 16]), Error>> {
         let cf = self.md5_cf();
 
